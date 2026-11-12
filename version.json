@@ -1,6 +1,6 @@
 {
-  "version": "1.0.2-beta",
+  "version": "1.0.3-beta",
   "date": "2026-11-12",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.2-beta/AssistantFM-setup.exe",
-  "changelog": "- Version 1.0.2-beta\n- Nom icône changé : Assistant FM\n- Barre de progression téléchargement\n- Version affichée en bas à droite\n- URL mise à jour vers repo releases dédié"
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.3-beta/AssistantFM-setup.exe",
+  "changelog": "- Version 1.0.3-beta\n- Retrait du module d'export/import de données personnelles\n- Interface simplifiée"
 }
