@@ -1,6 +1,6 @@
 {
-  "version": "1.0.4-beta",
+  "version": "1.0.5-beta",
   "date": "2026-11-12",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.4-beta/AssistantFM-setup.exe",
-  "changelog": "- Version 1.0.4-beta\n- Desactivation de l'ouverture automatique des DevTools\n- Correction de la notification Discord (JSON robuste)"
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.5-beta/AssistantFM-setup.exe",
+  "changelog": "- Version 1.0.5-beta\n- Retrait du module export/import de donnees personnelles\n- Desactivation des DevTools\n- Correction du redemarrage apres mise a jour\n- Bleu plus doux a la place du turquoise\n- Retrait de la zone glisser-deposer players_data.json"
 }
