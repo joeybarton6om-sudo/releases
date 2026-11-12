@@ -1,6 +1,6 @@
 {
-  "version": "1.0.0-beta",
+  "version": "1.0.1-beta",
   "date": "2026-11-12",
-  "url": "https://github.com/joeybarton6om-sudo/AssistantFM/releases/download/v1.0.0-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version initiale beta\n- Auto-update intégré\n- Don PayPal optionnel\n- Système de licence retiré"
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.1-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Ajustement colonnes Effectif Performance\n- URL mise à jour vers repo releases dédié\n- Colonne Joueur élargie (32%)"
 }
