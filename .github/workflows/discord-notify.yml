@@ -1,0 +1,25 @@
+name: Discord Release Notification
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_DATE: ${{ github.event.release.published_at }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          jq -n \
+            --arg title "🚀 Assistant FM - Nouvelle mise à jour" \
+            --arg tag "$RELEASE_TAG" \
+            --arg date "$RELEASE_DATE" \
+            --arg body "$RELEASE_BODY" \
+            '{embeds: [{title: $title, description: ("**Version:** " + $tag + "\n**Date:** " + $date + "\n\n" + $body), color: 5814783, footer: {text: "Assistant FM Updates"}, timestamp: $date}]}' \
+          | curl -sS -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK"

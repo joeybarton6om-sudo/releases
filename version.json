@@ -1,6 +1,6 @@
 {
-  "version": "1.0.7-beta",
+  "version": "1.0.8-beta",
   "date": "2026-11-14",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.7-beta/AssistantFM-setup.exe",
-  "changelog": "- TACTIQUE FM27 : 4 vues (combinée, avec le ballon, sans le ballon, les deux)\n- SEXE AUTOMATIQUE : filtre de genre basé sur club_gere_gender (0=H, 1=F, -1=Inconnu), plus de dropdown manuel\n- CORRECTION POSITIONS INCONNUES : éditeur Avec/Sans ballon par slot, corrections sauvegardées dans localStorage\n- ASSIGNATION JOUEURS : sélecteur de joueur par slot dans les rôles de tactique, affectations manuelles prioritaires\n- EXTRACTION SAUVEGARDE : patch fmsave.read_summary_clock et read_summary_facts pour contourner ReaderCheckError FM27, filtrage tactiques par club_uid\n- CONFIGURATION : 4 dossiers (logos, visages, sauvegardes, tactiques)\n- NETTOYAGE : retrait import .fmf (format binaire non lisible), retrait message dossier tactiques inutile"
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.8-beta/AssistantFM-setup.exe",
+  "changelog": "- COMPARATEUR DE JOUEURS : nouveau module dans le recrutement (bouton Comparateur)\n- Comparaison de 2 à 4 joueurs : radar d'attributs sur 20, tableau des écarts attribut par attribut face au joueur de référence\n- Export CSV de la comparaison et accès direct au suivi des joueurs comparés\n- EXTRACTION RÉPARÉE : le moteur d'extraction ne compilait plus (erreurs d'indentation dans parser.py)\n- Toutes les sections sont de nouveau fonctionnelles : profils, sélections, carrière, blessures, classements, nationalités, transferts et événements de match\n- CORRECTIFS D'AFFICHAGE : fiche joueur (bloc tactique), bandeau de support, assistant_desktop (ligne 222)\n- NETTOYAGE : .gitignore (build, dist et temp exclus du dépôt), README mis à jour"
 }
