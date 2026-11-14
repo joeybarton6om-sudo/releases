@@ -2,5 +2,5 @@
   "version": "1.0.10-beta",
   "date": "2026-11-14",
   "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.10-beta/AssistantFM-setup.exe",
-  "changelog": "- CORRECTIF D'AFFICHAGE : la version affichÃ©e en bas Ã  droite Ã©tait figÃ©e Ã  1.0.6-beta (constante figÃ©e dans app.js) ; elle suit dÃ©sormais le numÃ©ro rÃ©el de l'application\n- LISIBILITÃ‰ : le bandeau de version en bas Ã  droite ne se superpose plus au message de vÃ©rification de mise Ã  jour (texte placÃ© au mÃªme endroit, 10 px gris) ; contraste et taille de police augmentÃ©s\n- Le message de dÃ©bogage de mise Ã  jour est supprimÃ© de l'interface"
+  "changelog": "- CORRECTIF D'AFFICHAGE : la version affichée en bas à droite était figée à 1.0.6-beta (constante figée dans app.js) ; elle suit désormais le numéro réel de l'application\n- LISIBILITÉ : le bandeau de version en bas à droite ne se superpose plus au message de vérification de mise à jour (texte placé au même endroit, 10 px gris) ; contraste et taille de police augmentés\n- Le message de débogage de mise à jour est supprimé de l'interface"
 }
