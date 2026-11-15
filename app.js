@@ -9,6 +9,12 @@ let profilePosition = "", profileRole = "", profileActiveTab = "profile", profil
 let profileComparisonPlayerIndex = null;
 let competitionActiveTab = "classement";
 let staffOverviewTab = "recommendations";
+let staffSort = "";
+let staffScope = "division";
+let entrainementTacticId = "";
+let entrainementSort = "priorite";
+let programmeCollectifTacticId = "";
+let programmeCollectifHorizon = 56;
 let clubActiveTab = "effectif", clubRosterFilter = "all", clubRosterPositionFilter = "all";
 let clubRosterSort = "poste", clubRosterAscending = true;
 let clubIndexByName = new Map(), clubIndexById = new Map();
@@ -47,8 +53,6 @@ function sauvegarderJoueurAffectes(tacticId) {
         localStorage.setItem(`assistantfm-tactic-joueurs-${tacticId}`, JSON.stringify(tacticJoueurAffectes[tacticId] || {}));
     } catch (e) {}
 }
-// Version de l'application (doit correspondre à APP_VERSION dans assistant_desktop.py)
-const APP_VERSION = "1.0.6-beta";
 // URL du fichier version.json (repo releases dédié)
 const UPDATE_CHECK_URL = "https://raw.githubusercontent.com/joeybarton6om-sudo/releases/main/version.json";
 
@@ -70,7 +74,9 @@ const vuesClub = {
     laboratoire: "laboratoire-view",
     optimisation: "optimisation-view",
     jeunes: "jeunes-view",
-    confiance: "confiance-view"
+    confiance: "confiance-view",
+    entrainement: "entrainement-view",
+    programme_collectif: "programme-collectif-view"
 };
 const attributsGardien = [
     "handling", "aerial_reach", "command_of_area", "communication", "kicking",
@@ -604,6 +610,11 @@ document.getElementById("marge-reputation").addEventListener("input", event => {
     if (mode === "joueurs" || mode === "club") filtrerTout();
 });
 document.getElementById("staff-job-filter").addEventListener("change", filtrerTout);
+document.getElementById("staff-contract-filter").addEventListener("change", filtrerTout);
+document.getElementById("staff-sort").addEventListener("change", event => {
+    staffSort = event.target.value;
+    filtrerTout();
+});
 
 if (scr) {
     scr.addEventListener("scroll", () => {
@@ -1169,10 +1180,10 @@ function changerOnglet(nouveauMode) {
         club: "Mon club", similaires: "Joueurs similaires", diagnostic: "Diagnostic",
         performances: "Performances", laboratoire: "Laboratoire tactique", optimisation: "Optimiseur tactique",
         jeunes: "Développement des jeunes", confiance: "Confiance des données", suivi: "Suivi & comparaison",
-        alertes: "Alertes", journal: "Historique de partie"
+        alertes: "Alertes", journal: "Historique de partie", comparateur: "Comparateur de joueurs"
     };
     document.getElementById("workspace-title").textContent = titres[mode] || "Assistant FM";
-    const recrutementActif = ["joueurs", "staff", "similaires", "planificateur", "affaires", "mercato", "recrutement-poste"].includes(mode);
+    const recrutementActif = ["joueurs", "staff", "similaires", "planificateur", "affaires", "mercato", "recrutement-poste", "comparateur"].includes(mode);
     const suiviActif = ["suivi", "alertes", "journal"].includes(mode);
     if (recrutementActif) derniereVueRecrutement = mode;
     if (suiviActif) derniereVueSuivi = mode;
@@ -1210,7 +1221,7 @@ function changerOnglet(nouveauMode) {
     Object.entries(vuesClub).forEach(([tab, id]) => {
         document.getElementById(id).style.display = mode === "club" && clubActiveTab === tab ? "block" : "none";
     });
-    ["similaires", "alertes", "suivi", "journal"].forEach(name => {
+    ["similaires", "alertes", "suivi", "journal", "comparateur"].forEach(name => {
         const view = document.getElementById(`${name}-view`);
         if (!vuesClub[name]) view.style.display = mode === name ? "block" : "none";
     });
@@ -1220,7 +1231,7 @@ function changerOnglet(nouveauMode) {
     document.getElementById("recrutement-poste-view").style.display = mode === "recrutement-poste" ? "block" : "none";
     document.getElementById("column-options").style.display = ["joueurs", "staff"].includes(mode) ? "block" : "none";
     document.getElementById("recruitment-subnav").style.display = recrutementActif ? "flex" : "none";
-    document.getElementById("staff-filter").style.display = mode === "staff" ? "block" : "none";
+    document.getElementById("staff-filter").style.display = mode === "staff" ? "flex" : "none";
     document.getElementById("staff-overview").style.display = mode === "staff" && !modeDecouverte ? "block" : "none";
     document.getElementById("chk-mon-club").parentElement.style.display =
         mode === "joueurs" || mode === "staff" ? "flex" : "none";
@@ -1275,7 +1286,7 @@ function fermerAccesPremium() {
 
 function configEnTetes() {
     const headerConfig = mode === "staff"
-        ? { headers: [["nom", "Nom"], ["nationalite", "Nationalité"], ["metier", "Métier"], ["age", "Âge"], ["ca", "CA"], ["pa", "PA"], ["ligue", "Ligue"], ["salaire_hebdomadaire", "Salaire actuel"], ["club", "Club"]], widths: [17, 11, 18, 6, 6, 6, 10, 10, 16] }
+        ? { headers: [["nom", "Nom"], ["nationalite", "Nationalité"], ["metier", "Métier"], ["age", "Âge"], ["contrat", "Contrat"], ["ca", "CA"], ["pa", "PA"], ["ligue", "Ligue"], ["salaire_hebdomadaire", "Salaire actuel"], ["club", "Club"]], widths: [15, 10, 16, 5, 10, 5, 5, 10, 10, 14] }
         : mode === "joueurs"
             ? { headers: [["nom", "Nom"], ["poste", "Poste"], ["nationalite", "Nationalité"], ["ligue", "Ligue"], ["club", "Club"], ["age", "Âge"], ["taille_cm", "Taille"], ["pied_fort", "Pied"], ["salaire_hebdomadaire", "Salaire actuel"], ["ca", "CA"], ["pa", "PA"], ["reputation", "Réputation"], ["cout_estime", "Frais estimés"], ["role_recrutement", "Compatibilité"]], widths: [13, 6, 9, 10, 13, 4, 5, 6, 8, 4, 4, 5, 7, 6] }
             : { headers: [], widths: [] };
@@ -1309,11 +1320,17 @@ function configEnTetes() {
 function trier(property) {
     asc = sortProp === property ? !asc : true;
     sortProp = property;
+    if (mode === "staff") {
+        staffSort = "";
+        const selectTri = document.getElementById("staff-sort");
+        if (selectTri) selectTri.value = "";
+    }
     listAct.sort((a, b) => {
         const valeur = person => property === "role_recrutement" ? person.role_recrutement?.score
             : property === "nationalite" ? nomNation(person)
                 : property === "ligue" ? liguePersonne(person)
-                    : person[property];
+                    : property === "contrat" ? String(person.fin_contrat ?? "9999-12-31")
+                        : person[property];
         const left = valeur(a);
         const right = valeur(b);
         if (property === "poste") {
@@ -1374,6 +1391,7 @@ function filtrerTout() {
     if (mode === "similaires") { afficherSimilaires(); return; }
     if (mode === "alertes") { afficherAlertes(); return; }
     if (mode === "suivi") { afficherSuivi(); return; }
+    if (mode === "comparateur") { afficherComparateur(); return; }
     if (mode === "planificateur") {
         afficherPlanSportif();
         return;
@@ -1393,7 +1411,9 @@ function filtrerTout() {
             laboratoire: afficherLaboratoire,
             optimisation: afficherOptimisationTactique,
             jeunes: afficherJeunes,
-            confiance: afficherConfiance
+            confiance: afficherConfiance,
+            entrainement: afficherEntrainement,
+            programme_collectif: afficherProgrammeCollectif
         };
         (renderers[clubActiveTab] || afficherMonClub)();
         return;
@@ -1448,6 +1468,8 @@ function filtrerTout() {
         if (mode === "staff") {
             const metier = document.getElementById("staff-job-filter").value;
             if (metier && person.metier !== metier) return false;
+            const contrat = document.getElementById("staff-contract-filter").value;
+            if (contrat && contratStaff(person) !== contrat) return false;
         }
         if (!query) return true;
         const found = [
@@ -1463,6 +1485,7 @@ function filtrerTout() {
     }).map(person => mode === "joueurs"
         ? { ...person, role_recrutement: resumeRecrutement(person), cout_estime: coutEstime(person) }
         : person);
+    if (mode === "staff") appliquerTriStaff(listAct);
     statusFiltres.classList.toggle("error", Boolean(erreurFiltres || erreurFiltresRecrutement));
     statusFiltres.textContent = erreurFiltres || erreurFiltresRecrutement || `${listAct.length.toLocaleString("fr-FR")} profil(s) correspondant(s).`;
     if (mode === "joueurs") actualiserFiltresActifs(listAct.length);
@@ -1778,46 +1801,104 @@ function afficherBonnesAffaires() {
 function afficherEvaluationStaff() {
     const target = document.getElementById("staff-overview");
     const ownStaff = rawData.staff.filter(member => member.est_mon_club === true);
-    const jobs = [...new Set(rawData.staff.map(member => member.metier).filter(estMetierBackroom))];
+    const monClub = clubIndexById.get(String(rawData.club_gere?.uid ?? "")) || null;
+    const maCompetition = monClub ? classementClubActuel(monClub)?.competition_uid ?? null : null;
+    const maNation = monClub?.nation_id ?? rawData.club_gere?.nation_id ?? null;
+    const reputationMonClub = monClub?.reputation ?? null;
+    const nomMaDivision = nomCompetition(classementClubActuel(monClub), monClub || {});
+    const jobs = [...new Set(rawData.staff.map(member => member.metier).filter(estMetierBackroom))]
+        .sort((a, b) => traduireMetier(a).localeCompare(traduireMetier(b), "fr"));
     const evaluations = jobs.map(job => {
-        const jobStaff = rawData.staff.filter(member => member.metier === job);
-        const currentBest = ownStaff
-            .filter(member => member.metier === job)
-            .reduce((best, member) => !best || Number(member.ca || 0) > Number(best.ca || 0) ? member : best, null);
-        const globalBest = jobStaff
-            .reduce((best, member) => !best || Number(member.ca || 0) > Number(best.ca || 0) ? member : best, null);
-        const bestExternal = jobStaff
-            .filter(member => member.est_mon_club !== true)
-            .reduce((best, member) => !best || Number(member.ca || 0) > Number(best.ca || 0) ? member : best, null);
+        const mesMembres = ownStaff.filter(member => member.metier === job && estNombre(member.ca));
+        const currentBest = mesMembres.reduce((best, member) =>
+            !best || Number(member.ca) > Number(best.ca) ? member : best, null);
+        const externes = rawData.staff
+            .filter(member => member.metier === job && member.est_mon_club !== true && estNombre(member.ca))
+            .map(member => ({ member, portee: porteeStaff(member) }));
+        let groupe = externes.filter(item => dansPortee(item.portee, staffScope, maCompetition, maNation));
+        let portee = porteeEffective(groupe, staffScope, maCompetition);
+        let niveauFiltre = false;
+        if (portee !== staffScope) {
+            groupe = externes.filter(item => dansPortee(item.portee, portee, maCompetition, maNation));
+        }
+        if (portee !== "division" && groupe.length) {
+            const comparables = groupe.filter(item => niveauComparable(item.member, reputationMonClub));
+            if (comparables.length >= 3) {
+                groupe = comparables;
+                niveauFiltre = true;
+            }
+        }
+        const tries = groupe.slice().sort((a, b) =>
+            Number(b.member.ca) - Number(a.member.ca) || contratStaff(a.member).localeCompare(contratStaff(b.member)));
+        const valeurs = groupe.map(item => Number(item.member.ca));
         return {
             job,
             currentBest,
-            globalBest,
-            bestExternal,
-            gap: Number(globalBest?.ca || 0) - Number(currentBest?.ca || 0)
+            cible: tries[0]?.member || null,
+            candidats: tries.slice(0, 3).map(item => item.member),
+            portee,
+            porteeDemandee: staffScope,
+            niveauFiltre,
+            statistiques: statistiquesValeurs(valeurs),
+            rang: percentileValeur(currentBest?.ca, valeurs)
         };
     });
-    const recommendations = evaluations
-        .sort((a, b) => Number(Boolean(a.currentBest)) - Number(Boolean(b.currentBest))
-            || Number(b.bestExternal?.ca || 0) - Number(a.bestExternal?.ca || 0));
-    const weaknesses = evaluations
-        .filter(item => item.currentBest && item.globalBest && item.gap >= 15)
-        .sort((a, b) => b.gap - a.gap);
-    const renderRecommendation = item => `<div class="dashboard-item"><strong>${escapeHtml(traduireMetier(item.job))}</strong> · ${item.bestExternal ? `profil externe de référence : ${linkStaff(item.bestExternal)} CA ${escapeHtml(item.bestExternal.ca ?? "—")}` : "aucun profil externe disponible"} · ${item.currentBest ? `effectif actuel : ${linkStaff(item.currentBest)} CA ${escapeHtml(item.currentBest.ca ?? "—")}` : "métier non couvert"}</div>`;
-    const renderWeakness = item => `<div class="dashboard-item"><strong>${escapeHtml(traduireMetier(item.job))}</strong> · ${linkStaff(item.currentBest)} CA ${escapeHtml(item.currentBest.ca ?? "—")} vs ${linkStaff(item.globalBest)} CA ${escapeHtml(item.globalBest.ca ?? "—")}</div>`;
-    target.innerHTML = `<h3>Recommandations et évaluation du staff</h3>
+    const recommandations = evaluations
+        .slice()
+        .sort((a, b) => Number(!a.currentBest) - Number(!b.currentBest)
+            || (a.rang ?? 101) - (b.rang ?? 101)
+            || Number(b.cible?.ca ?? 0) - Number(a.cible?.ca ?? 0));
+    const faiblesses = evaluations
+        .filter(item => !item.currentBest || (item.rang !== null && item.rang < 40))
+        .sort((a, b) => (a.rang ?? -1) - (b.rang ?? -1));
+    const renderCandidat = member => member
+        ? `${linkStaff(member)} · CA ${escapeHtml(member.ca ?? "—")} · ${escapeHtml(member.age ?? "—")} ans · ${escapeHtml(finContratLisible(member))} · ${estNombre(member.salaire_hebdomadaire) ? `${formatMoney(member.salaire_hebdomadaire)}/sem.` : "salaire inconnu"}`
+        : "aucun profil comparable dans cette portée";
+    const renderRecommandation = item => {
+        const stats = item.statistiques;
+        const porteeLabel = intitulePortee(item.portee, nomMaDivision);
+        const comparaison = item.rang === null
+            ? "votre staff n’a pas de profil pour ce métier"
+            : `${item.rang}e percentile${stats ? ` · médiane ${stats.mediane} · top 10 % ${stats.p90}` : ""}`;
+        const notes = [];
+        if (item.portee !== item.porteeDemandee && item.porteeDemandee === "division") {
+            notes.push("référence élargie : trop peu de profils en division");
+        }
+        if (item.niveauFiltre) notes.push("profils de réputation comparable à votre club");
+        const elargissement = notes.length ? ` <em>(${notes.join(" · ")})</em>` : "";
+        const cible = item.cible && (!item.currentBest || Number(item.cible.ca) > Number(item.currentBest.ca))
+            ? item.cible
+            : null;
+        const ligneCible = cible
+            ? `Cible : ${renderCandidat(cible)}`
+            : item.currentBest
+                ? `Aucune cible crédible : votre staff dépasse déjà les profils de ce niveau (meilleur : ${linkStaff(item.currentBest)} · CA ${escapeHtml(item.currentBest.ca ?? "—")})`
+                : `Cible : ${renderCandidat(null)}`;
+        return `<div class="dashboard-item"><strong>${escapeHtml(traduireMetier(item.job))}</strong> · ${escapeHtml(porteeLabel)}${elargissement} · ${escapeHtml(comparaison)} · ${stats ? `${stats.effectif} profil(s) comparé(s)` : "aucun profil comparable"}<br>${ligneCible}${item.currentBest ? `<br>Votre meilleur : ${linkStaff(item.currentBest)} · CA ${escapeHtml(item.currentBest.ca ?? "—")}` : ""}<br><button type="button" class="tab-btn" data-staff-cible="${escapeHtml(item.job)}">Voir les profils de ce métier</button></div>`;
+    };
+    const renderFaiblesse = item => `<div class="dashboard-item"><strong>${escapeHtml(traduireMetier(item.job))}</strong> · ${item.currentBest
+        ? `${item.rang}e percentile dans ${escapeHtml(intitulePortee(item.portee, nomMaDivision))}${item.statistiques ? ` — médiane ${item.statistiques.mediane}, votre meilleur ${escapeHtml(item.currentBest.ca ?? "—")}` : ""}`
+        : "métier non couvert dans votre staff"}${item.cible && (!item.currentBest || Number(item.cible.ca) > Number(item.currentBest.ca)) ? ` · cible accessible : ${linkStaff(item.cible)} CA ${escapeHtml(item.cible.ca ?? "—")}` : ""}</div>`;
+    const porteeOptions = [["division", "Ma division"], ["nation", "Ma nation"], ["monde", "Monde entier"]]
+        .map(([value, label]) => `<option value="${value}"${staffScope === value ? " selected" : ""}>${label}</option>`).join("");
+    target.innerHTML = `<div class="staff-overview-heading"><h3>Recommandations et évaluation du staff</h3>
+        <label for="staff-scope">Référence de comparaison <select id="staff-scope" class="staff-scope-select" aria-label="Portée de comparaison du staff">${porteeOptions}</select></label></div>
         <div class="staff-overview-tabs" role="tablist" aria-label="Recommandations et évaluation du staff">
             <button type="button" class="tab-btn${staffOverviewTab === "recommendations" ? " active" : ""}" role="tab" aria-selected="${staffOverviewTab === "recommendations"}" aria-controls="staff-overview-recommendations" data-staff-overview-tab="recommendations">Recommandations</button>
             <button type="button" class="tab-btn${staffOverviewTab === "evaluation" ? " active" : ""}" role="tab" aria-selected="${staffOverviewTab === "evaluation"}" aria-controls="staff-overview-evaluation" data-staff-overview-tab="evaluation">Évaluation</button>
         </div>
         <section class="staff-overview-panel" id="staff-overview-recommendations" role="tabpanel"${staffOverviewTab === "recommendations" ? "" : " hidden"}>
-            <div class="dashboard-card"><h3>Profils externes de référence par métier</h3>${recommendations.length ? recommendations.map(renderRecommendation).join("") : "<div class=\"dashboard-item\">Aucun métier de backroom identifié dans l’export.</div>"}</div>
-            <p class="caveat">Les profils externes sont des références, pas des candidats dont l’acceptation est connue.</p>
+            <div class="dashboard-card"><h3>Cibles du même niveau que votre club</h3>${recommandations.length ? recommandations.map(renderRecommandation).join("") : "<div class=\"dashboard-item\">Aucun métier de backroom identifié dans l’export.</div>"}</div>
+            <p class="caveat">Les cibles sont les meilleurs profils du même niveau que votre club (division par défaut, élargis à la nation s’il y a trop peu de profils), pas les meilleurs du monde. Un profil « sans contrat » est libre de tout engagement ; les autres demandent un accord de leur club.</p>
         </section>
         <section class="staff-overview-panel" id="staff-overview-evaluation" role="tabpanel"${staffOverviewTab === "evaluation" ? "" : " hidden"}>
-            <div class="dashboard-card"><h3>Écarts de CA à examiner</h3>${weaknesses.length ? weaknesses.map(renderWeakness).join("") : "<div class=\"dashboard-item\">Aucun écart de 15 points ou plus par métier détecté.</div>"}</div>
-            <p class="caveat">Évaluation indicative basée uniquement sur le CA global par métier. Les attributs spécifiques aux entraîneurs/recruteurs et les étoiles d’entraînement ne sont pas disponibles dans cet export; les préférences et l’adaptabilité ne sont pas assimilées à ces compétences.</p>
+            <div class="dashboard-card"><h3>Écarts à examiner</h3>${faiblesses.length ? faiblesses.map(renderFaiblesse).join("") : "<div class=\"dashboard-item\">Aucun métier sous la médiane de votre niveau de référence.</div>"}</div>
+            <p class="caveat">Évaluation basée sur le CA global par métier, comparé aux profils du même niveau que votre club. Les attributs spécifiques aux entraîneurs/recruteurs et les étoiles d’entraînement ne sont pas disponibles dans cet export ; les préférences et l’adaptabilité ne sont pas assimilées à ces compétences.</p>
         </section>`;
+    target.querySelector("#staff-scope").addEventListener("change", event => {
+        staffScope = event.target.value;
+        afficherEvaluationStaff();
+    });
     target.querySelectorAll("[data-staff-overview-tab]").forEach(button => button.addEventListener("click", () => {
         staffOverviewTab = button.dataset.staffOverviewTab;
         target.querySelectorAll("[data-staff-overview-tab]").forEach(tab => {
@@ -1829,6 +1910,480 @@ function afficherEvaluationStaff() {
             panel.hidden = panel.id !== `staff-overview-${staffOverviewTab}`;
         });
     }));
+    target.querySelectorAll("[data-staff-cible]").forEach(button => button.addEventListener("click", () => {
+        const job = button.dataset.staffCible;
+        document.getElementById("staff-job-filter").value = job;
+        document.getElementById("staff-contract-filter").value = "";
+        document.getElementById("staff-sort").value = "ca_desc";
+        staffSort = "ca_desc";
+        filtrerTout();
+        document.getElementById("results-table")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }));
+}
+
+const ORDRE_INTENSITE = { "légère": 0, "normale": 1, "intense": 2 };
+
+function codePosteEntrainement(item) {
+    const joueur = item.joueur || {};
+    const positions = joueur.positions || {};
+    const codes = Object.keys(positions).filter(code => Number(positions[code]) > 1);
+    if (codes.length > 0) {
+        return codes.sort((a, b) => Number(positions[b]) - Number(positions[a]) || a.localeCompare(b))[0].toLowerCase();
+    }
+    const premier = String(joueur.poste || "").split(/[,\/]/)[0].trim();
+    return premier ? premier.toLowerCase() : "";
+}
+
+function trierPlansEntrainement(plans, critere) {
+    const ORDRE_POSTES = ["gk", "sw", "dc", "dcg", "dcd", "dl", "wbl", "dr", "wbr",
+        "dm", "mdg", "mdd", "ml", "mc", "mcg", "mcd", "mr", "aml", "amc", "amr", "stc", "btg", "btd"];
+    const PARTICULES = new Set(["van", "von", "de", "der", "den", "del", "della", "di", "da", "dos", "du",
+        "la", "le", "les", "el", "al", "bin", "ibn", "ter", "ten", "op", "mac", "mc", "st"]);
+    const nomDeFamille = nom => {
+        const mots = String(nom || "").trim().split(/\s+/).filter(Boolean);
+        if (mots.length <= 1) return mots[0] || "";
+        for (let rang = 1; rang < mots.length - 1; rang += 1) {
+            if (PARTICULES.has(mots[rang].toLocaleLowerCase("fr"))) return mots.slice(rang).join(" ");
+        }
+        return mots[mots.length - 1];
+    };
+    const cleTexte = valeur => String(valeur || "").normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("fr");
+    const rangPoste = code => {
+        const rang = ORDRE_POSTES.indexOf(String(code || ""));
+        return rang < 0 ? ORDRE_POSTES.length : rang;
+    };
+    const cle = String(critere || "priorite");
+    const inverse = cle.endsWith("_desc");
+    const comparateur = (a, b) => {
+        if (cle.startsWith("nom")) {
+            return cleTexte(nomDeFamille(a.joueur.nom)).localeCompare(cleTexte(nomDeFamille(b.joueur.nom)), "fr")
+                || cleTexte(a.joueur.nom).localeCompare(cleTexte(b.joueur.nom), "fr");
+        }
+        if (cle.startsWith("age")) {
+            return (a.joueur.age == null ? 999 : Number(a.joueur.age)) - (b.joueur.age == null ? 999 : Number(b.joueur.age));
+        }
+        if (cle.startsWith("poste")) {
+            return rangPoste(codePosteEntrainement(a)) - rangPoste(codePosteEntrainement(b))
+                || cleTexte(nomDeFamille(a.joueur.nom)).localeCompare(cleTexte(nomDeFamille(b.joueur.nom)), "fr");
+        }
+        if (cle.startsWith("intensite")) {
+            const rang = item => ORDRE_INTENSITE[String(item.intensite?.niveau || "").toLowerCase()] ?? -1;
+            return rang(a) - rang(b);
+        }
+        return 0;
+    };
+    return inverse ? [...plans].sort(comparateur).reverse() : [...plans].sort(comparateur);
+}
+
+function afficherEntrainement() {
+    const cible = document.getElementById("entrainement-view");
+    if (!cible) return;
+    if (!window.AssistantFMEntrainement) {
+        cible.innerHTML = "<h2>Entraînement individuel</h2><p>Module d’entraînement indisponible.</p>";
+        return;
+    }
+    const joueurs = rawData.joueurs.filter(joueur => joueur.est_mon_club === true);
+    const tactiques = Array.isArray(rawData.tactiques) ? rawData.tactiques : [];
+    const tactique = tactiques.find(item => String(item.id) === String(entrainementTacticId)) || tactiques[0] || null;
+    if (tactique) entrainementTacticId = String(tactique.id);
+    const summary = AssistantFMEntrainement.planGlobal(joueurs, tactique, {
+        roles,
+        rolesParPoste,
+        noteRole,
+        rolesChoisis: tactique ? (tacticalRoles[tactique.id] || {}) : {},
+        affectations: tactique ? (tacticJoueurAffectes[tactique.id] || {}) : {},
+        limitePriorites: 1
+    });
+    const optionsTactique = tactiques.map(item =>
+        `<option value="${escapeHtml(item.id)}"${String(item.id) === String(tactique?.id) ? " selected" : ""}>${escapeHtml(item.nom || `Tactique ${item.id}`)}${item.style ? ` · ${escapeHtml(item.style)}` : ""}</option>`
+    ).join("");
+    const roleLabel = slot => !slot
+        ? "<span class=\"muted\">aucun rôle compatible</span>"
+        : `<strong>${escapeHtml(slot.role.nom)}</strong><span class="role-detail muted">${escapeHtml(nomPoste(slot.position))}${slot.duty ? ` · ${escapeHtml(slot.duty)}` : ""}</span><span class="role-note muted">${slot.score.toFixed(1)}/20</span>${slot.manuel ? " <span class=\"tag-manuel\">manuel</span>" : ""}`;
+    const prioriteHtml = item => (item.priorites || []).map(priorite =>
+        `<div class="focus-ligne"><span class="focus-titre"><strong>${escapeHtml(priorite.nom)}</strong> <span class="muted">${escapeHtml(priorite.categorie)}</span></span><span class="role-note muted">${priorite.score}/20</span><span class="focus-attributs muted">${priorite.valeurs.map(valeur => `${escapeHtml(nomsStats[valeur.cle] || valeur.cle)} ${valeur.valeur}`).join(" · ")}</span></div>`
+    ).join("") || "<span class=\"muted\">aucun focus identifié</span>";
+    const plans = trierPlansEntrainement(summary.plans, entrainementSort);
+    const lignes = plans.map(item => {
+        const uid = item.joueur.uid == null ? "" : String(item.joueur.uid);
+        return `<tr${uid ? ` data-entrainement-joueur="${escapeHtml(uid)}"` : ""}>
+            <td>${linkJoueur(item.joueur)}</td>
+            <td>${item.joueur.age == null ? "—" : escapeHtml(item.joueur.age)}</td>
+            <td>${roleLabel(item.avec)}</td>
+            <td>${roleLabel(item.sans)}</td>
+            <td>${prioriteHtml(item)}</td>
+            <td><strong>${escapeHtml(item.intensite.niveau)}</strong><div class="muted">${escapeHtml(item.intensite.raisons.join(" · "))}</div></td>
+        </tr>`;
+    }).join("");
+    const focusUrgence = summary.focusPlusUrgeants.length
+        ? summary.focusPlusUrgeants.map(item => `<span class="tag">${escapeHtml(item.nom)} · ${item.joueurs.length}</span>`).join(" ")
+        : "<span class=\"muted\">aucun focus prioritaire identifié</span>";
+    const intensites = summary.parNiveau.filter(item => item.joueurs.length)
+        .map(item => `<span class="tag">${escapeHtml(item.niveau)} · ${item.joueurs.length}</span>`).join(" ") || "<span class=\"muted\">aucun joueur couvert</span>";
+    const avertissement = tactique
+        ? ""
+        : "<p class=\"caveat\">Aucune tactique n’est enregistrée dans cette sauvegarde : les rôles avec et sans ballon ne peuvent pas être déduits.</p>";
+    cible.innerHTML = `<h2>Entraînement individuel · accompagnement</h2>
+        <p class="caveat">Chaque joueur reçoit un rôle d’entraînement avec ballon (ALB) et sans ballon (SLB) déduit de la tactique sélectionnée, puis une priorité de travail et une intensité. Les rôles venaient de votre tactique ; les priorités sont les focus FM27 dont les attributs sont les plus faibles par rapport aux rôles. Ces valeurs sont des recommandations à saisir dans le jeu, pas des réglages lus dans la sauvegarde.</p>
+        ${avertissement}
+        <div class="club-tactic-controls">
+            <label for="entrainement-tactic-select">Tactique de référence<select id="entrainement-tactic-select">${optionsTactique || "<option value=\"\">Aucune tactique</option>"}</select></label>
+            <label for="entrainement-sort-select">Trier par<select id="entrainement-sort-select">
+                <option value="priorite"${entrainementSort === "priorite" ? " selected" : ""}>Priorité du plan</option>
+                <option value="nom_asc"${entrainementSort === "nom_asc" ? " selected" : ""}>Nom de famille (A → Z)</option>
+                <option value="nom_desc"${entrainementSort === "nom_desc" ? " selected" : ""}>Nom de famille (Z → A)</option>
+                <option value="poste_asc"${entrainementSort === "poste_asc" ? " selected" : ""}>Poste (Gardien → Attaquant)</option>
+                <option value="poste_desc"${entrainementSort === "poste_desc" ? " selected" : ""}>Poste (Attaquant → Gardien)</option>
+                <option value="age_asc"${entrainementSort === "age_asc" ? " selected" : ""}>Âge (croissant)</option>
+                <option value="age_desc"${entrainementSort === "age_desc" ? " selected" : ""}>Âge (décroissant)</option>
+                <option value="intensite_desc"${entrainementSort === "intensite_desc" ? " selected" : ""}>Intensité (élevée d’abord)</option>
+            </select></label>
+            <button type="button" id="entrainement-copy">Copier le plan (CSV)</button>
+            <button type="button" id="entrainement-csv">Exporter le CSV</button>
+            <span id="entrainement-status" role="status" class="muted"></span>
+        </div>
+        <div class="dashboard-grid">
+            <div class="dashboard-card"><h3>Couverture</h3><p>${summary.couverts} joueur(s) sur ${summary.total} ont un rôle compatible avec la tactique.</p></div>
+            <div class="dashboard-card"><h3>Focus les plus urgents</h3><p>${focusUrgence}</p></div>
+            <div class="dashboard-card"><h3>Intensité recommandée</h3><p>${intensites}</p></div>
+        </div>
+        <div class="scroll club-squad-table-wrap"><table class="club-squad-table entrainement-table">
+            <thead><tr><th>Joueur</th><th>Âge</th><th>Rôle avec ballon (ALB)</th><th>Rôle sans ballon (SLB)</th><th>Priorité de l’entraînement</th><th>Intensité</th></tr></thead>
+            <tbody>${lignes || "<tr><td colspan=\"6\" style=\"text-align:center;color:#aaa;padding:16px\">Aucun joueur dans l’effectif.</td></tr>"}</tbody>
+        </table></div>
+        <p class="profile-disclaimer">Les notes /20 mélangent les attributs du rôle (85 %) et la familiarité du joueur au poste (15 %). Un rôle marqué « affectation manuelle » vient de vos choix dans la vue tactique.</p>`;
+    cible.querySelector("#entrainement-tactic-select")?.addEventListener("change", event => {
+        entrainementTacticId = event.target.value;
+        afficherEntrainement();
+    });
+    cible.querySelector("#entrainement-sort-select")?.addEventListener("change", event => {
+        entrainementSort = event.target.value;
+        afficherEntrainement();
+    });
+    cible.querySelectorAll("[data-entrainement-joueur]").forEach(ligne => {
+        ligne.addEventListener("click", () => ouvrirProfil("joueur", ligne.dataset.entrainementJoueur));
+    });
+    const csv = () => AssistantFMEntrainement.csvPlan({ ...summary, plans }, { nomsStats, nomPoste });
+    const statut = cible.querySelector("#entrainement-status");
+    cible.querySelector("#entrainement-copy")?.addEventListener("click", async () => {
+        try {
+            await navigator.clipboard.writeText(csv());
+            if (statut) statut.textContent = "Plan copié dans le presse-papiers.";
+        } catch (error) {
+            if (statut) statut.textContent = `Copie impossible : ${error.message}`;
+        }
+    });
+    cible.querySelector("#entrainement-csv")?.addEventListener("click", () => {
+        const blob = new Blob([`\uFEFF${csv()}`], { type: "text/csv;charset=utf-8" });
+        const lien = document.createElement("a");
+        lien.href = URL.createObjectURL(blob);
+        lien.download = `entrainement-${String(entrainementTacticId || "tactique").replace(/[^a-zA-Z0-9-_]/g, "-")}.csv`;
+        lien.click();
+        URL.revokeObjectURL(lien.href);
+        if (statut) statut.textContent = "Export CSV téléchargé.";
+    });
+}
+
+const BLOCS_PROGRAMME = {
+    developpement: "Développement",
+    preparation: "Préparation du match",
+    recuperation: "Récupération",
+    physique: "Travail physique",
+    repos: "Repos"
+};
+
+function afficherProgrammeCollectif() {
+    const cible = document.getElementById("programme-collectif-view");
+    if (!cible) return;
+    if (!window.AssistantFMEntrainementCollectif) {
+        cible.innerHTML = "<h2>Programme collectif</h2><p>Module de planification indisponible.</p>";
+        return;
+    }
+    const module = AssistantFMEntrainementCollectif;
+    const joueurs = (rawData.joueurs || []).filter(joueur => joueur.est_mon_club === true);
+    const calendrier = Array.isArray(rawData.calendrier) ? rawData.calendrier : [];
+    const dateDebut = rawData.date_sauvegarde || "";
+    const tactiques = Array.isArray(rawData.tactiques) ? rawData.tactiques : [];
+    const tactique = tactiques.find(item => String(item.id) === String(programmeCollectifTacticId)) || tactiques[0] || null;
+    if (tactique) programmeCollectifTacticId = String(tactique.id);
+    const programme = dateDebut
+        ? module.genererProgramme({ dateDebut, calendrier, joueurs, tactique, nbJours: programmeCollectifHorizon })
+        : null;
+    const optionsTactique = tactiques.map(item =>
+        `<option value="${escapeHtml(item.id)}"${tactique && String(item.id) === String(tactique.id) ? " selected" : ""}>${escapeHtml(item.nom || `Tactique ${item.id}`)}${item.style ? ` · ${escapeHtml(item.style)}` : ""}</option>`
+    ).join("");
+    const optionsHorizon = [28, 42, 56, 84, 364].map(nb =>
+        `<option value="${nb}"${nb === programmeCollectifHorizon ? " selected" : ""}>${nb / 7} semaines</option>`
+    ).join("");
+    const libelleJour = date => {
+        const d = module.convertirDate(date);
+        return d ? d.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }) : String(date || "");
+    };
+    const MOIS_FICHIER = ["janvier", "février", "mars", "avril", "mai", "juin",
+        "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+    const nomFichierPlanning = dateIso => {
+        const d = module.convertirDate(dateIso);
+        if (!d) return `AssistantFM ${String(dateIso || "").slice(0, 10)}`.trim();
+        const jour = String(d.getDate()).padStart(2, "0");
+        return `${jour} ${MOIS_FICHIER[d.getMonth()]} ${d.getFullYear()} AssistantFM`;
+    };
+    const libelleBloc = bloc => BLOCS_PROGRAMME[bloc] || "Développement";
+    const matchsParJour = new Map(calendrier.map(match => [String(match.date).slice(0, 10), match]));
+    const semaines = programme ? module.resumeSemaines(programme, calendrier) : [];
+    const semainesHtml = semaines.map((semaine, index) => {
+        const jours = semaine.jours.map(jour => {
+            const match = matchsParJour.get(jour.date);
+            const etiquette = jour.avantMatch === 0
+                ? "Match"
+                : jour.avantMatch == null
+                    ? "Sans séance"
+                    : jour.avantMatch === 1 ? "Veille de match" : `J-${jour.avantMatch}`;
+            const seances = jour.seances.length
+                ? jour.seances.map(seance =>
+                    `<span class="programme-seance"><strong>${escapeHtml(seance.nom)}</strong><span class="programme-seance-type">${escapeHtml(seance.onglet)}${seance.description ? ` · ${escapeHtml(seance.description)}` : ""}</span></span>`
+                ).join("")
+                : "<span class=\"programme-aucun\">Aucune séance</span>";
+            return `<article class="programme-jour"${match ? " data-match=\"1\"" : ""}>
+                <h4>${escapeHtml(libelleJour(jour.date))}</h4>
+                <span class="programme-bloc">${escapeHtml(etiquette)} · ${escapeHtml(libelleBloc(jour.bloc))}${match ? ` · ${escapeHtml(match.adversaire)} (${escapeHtml(match.lieu)})` : ""}</span>
+                ${seances}
+                <span class="programme-charge">Charge estimée : ${escapeHtml(jour.charge)}</span>
+            </article>`;
+        }).join("");
+        const programmes = semaine.jours.filter(jour => jour.seances.length).length;
+        return `<section class="programme-semaine"><h3>Semaine du ${escapeHtml(libelleJour(semaine.debut))} <span class="muted">${programmes} jour(s) programmé(s) sur 7</span> <button type="button" class="programme-export" data-index="${index}">Exporter .fmf</button></h3><div class="programme-jours">${jours}</div></section>`;
+    }).join("");
+    const prochaineRencontre = calendrier.find(match => String(match.date).slice(0, 10) >= dateDebut);
+    const ecart = prochaineRencontre ? module.joursEntre(dateDebut, prochaineRencontre.date) : null;
+    const dateFinSemaine = module.convertirDate(dateDebut);
+    if (dateFinSemaine) dateFinSemaine.setDate(dateFinSemaine.getDate() + 6);
+    const texteSemaine = programme
+        ? module.texteSaisie(programme, { debut: programme.dateDebut, fin: dateFinSemaine ? module.formaterDate(dateFinSemaine) : "" })
+        : "";
+    const texteTout = programme ? module.texteSaisie(programme) : "";
+    const metriques = programme ? programme.metriques : null;
+    const metriquesHtml = programme ? `
+        <div class="programme-metrics">
+            <div class="programme-metric"><span class="muted">Phase de saison</span><strong>${escapeHtml(programme.phase.nom)}</strong><span class="muted">${escapeHtml(programme.phase.description)}</span></div>
+            <div class="programme-metric"><span class="muted">Prochain match</span><strong>${prochaineRencontre ? escapeHtml(prochaineRencontre.adversaire) : "Aucun"}</strong><span class="muted">${prochaineRencontre ? `${escapeHtml(prochaineRencontre.lieu)} · dans ${escapeHtml(ecart)} j` : "Calendrier indisponible"}</span></div>
+            <div class="programme-metric"><span class="muted">Charge moyenne</span><strong>${escapeHtml(metriques.chargeMoyenne)}</strong><span class="muted">${escapeHtml(metriques.jours)} jour(s) · ${escapeHtml(metriques.seancesUtilisees)} séance(s) distincte(s)</span></div>
+            <div class="programme-metric"><span class="muted">Récupération</span><strong>${escapeHtml(metriques.joursRecuperation)} jour(s)</strong><span class="muted">${escapeHtml(metriques.besoinsForts)} besoin(s) fort(s) ciblé(s)</span></div>
+        </div>` : "";
+    const enregistre = rawData.entrainement_collectif;
+    const semainesEnregistrees = enregistre && Array.isArray(enregistre.semaines) ? enregistre.semaines : [];
+    const htmlEnregistre = semainesEnregistrees.length
+        ? semainesEnregistrees.map(semaine => {
+            const jours = (semaine.jours || []).map(jour => {
+                const seances = (jour.seances || []).map(seance =>
+                    `<span class="programme-seance">${seance.nom ? escapeHtml(seance.nom) : `Séance inconnue (code ${escapeHtml(seance.code)})`}</span>`
+                ).join("");
+                return `<article class="programme-jour"><h4>${escapeHtml(libelleJour(jour.date))}</h4>${seances || "<span class=\"programme-aucun\">Aucune séance</span>"}</article>`;
+            }).join("");
+            return `<section class="programme-semaine"><h3>Semaine du ${escapeHtml(libelleJour(semaine.debut))} <span class="muted">${escapeHtml(semaine.planning || "planning sans nom")}</span></h3><div class="programme-jours">${jours}</div></section>`;
+        }).join("")
+        : "<p class=\"programme-aucun\">La sauvegarde ne contient pas de calendrier d’entraînement lisible pour le club géré.</p>";
+    const avertissement = dateDebut
+        ? ""
+        : "<p class=\"caveat\">Date de sauvegarde indisponible : le programme ne peut pas être positionné dans la saison.</p>";
+    cible.innerHTML = `<h2>Programme collectif · ${escapeHtml(programme ? programme.phase.nom : "planification")}</h2>
+        <p class="caveat">Chaque cycle menant à un match reçoit un plan jour par jour : récupération après la rencontre (les deux jours qui suivent), développement des points faibles de l’effectif, puis préparation du match et coups de pied arrêtés. Les séances sont choisies parmi les 28 séances collectives de FM27 selon les besoins mesurés de vos joueurs, votre tactique et le calendrier. Ce sont des recommandations à saisir dans le jeu, pas un réglage lu dans la sauvegarde.</p>
+        ${avertissement}
+        <div class="programme-entete">
+            <label for="programme-tactic-select">Tactique de référence<select id="programme-tactic-select">${optionsTactique || "<option value=\"\">Aucune tactique</option>"}</select></label>
+            <label for="programme-horizon-select">Horizon<select id="programme-horizon-select">${optionsHorizon}</select></label>
+            <button type="button" id="programme-copy">Copier le programme (CSV)</button>
+            <button type="button" id="programme-csv">Exporter le CSV</button>
+            <button type="button" id="programme-export-tout">Tout exporter (.zip)</button>
+            <button type="button" id="programme-importer-tout">Importer dans le jeu</button>
+            <button type="button" id="programme-importer-saison" class="programme-saison">Toute la saison dans le jeu</button>
+            <span id="programme-status" role="status" class="muted"></span>
+        </div>
+        ${metriquesHtml}
+        <section class="programme-saisie">
+            <h3>Saisie dans le jeu</h3>
+            <p class="caveat">FM27 ne lit pas de fichier de planning : les séances se règlent dans l’écran Entraînement, trois créneaux par jour. Copiez la liste ci-dessous et reportez-la dans le jeu, ou gardez-la ouverte à côté de la fenêtre.</p>
+            <p><button type="button" id="programme-copy-semaine">Copier la semaine</button> <button type="button" id="programme-copy-tout">Copier tout le programme</button> <span id="programme-saisie-status" role="status" class="muted"></span></p>
+            <pre id="programme-texte-semaine">${escapeHtml(texteSemaine || "Aucune journée à saisir.")}</pre>
+        </section>
+        <section class="programme-saisie">
+            <h3>Plannings importés dans le jeu</h3>
+            <div id="programme-fmf"><span class="muted">Lecture du dossier « schedules »…</span></div>
+            <p class="caveat">FM27 range chaque planning dans un conteneur <code>.fmf</code> chiffré (AES-128-CTR + zstd). L’application les lit, liste vos exports, et sait aussi en fabriquer : « Exporter .fmf » sur une semaine écrit un fichier à copier dans le dossier <code>schedules</code> du jeu, « Tout exporter (.zip) » télécharge le programme complet en une archive, et « Importer dans le jeu » écrit directement les fichiers dans le dossier <code>schedules</code> (sans jamais écraser un planning existant : un nouvel import crée des copies suffixées « (2) », « (3) »…). Les fichiers sont nommés d’après leur date de début de semaine (<code>04 octobre 2027 AssistantFM.fmf</code>) pour se trier facilement. « Toute la saison dans le jeu » écrit toutes les semaines du calendrier connu en une fois : dans FM27, chargez ensuite le planning de la semaine en cours (les autres semaines restent disponibles dans la liste).</p>
+        </section>
+        ${semainesHtml || "<p class=\"programme-aucun\">Aucun programme généré.</p>"}
+        <details class="dashboard-card"><summary>Calendrier d’entraînement enregistré dans la sauvegarde</summary>${htmlEnregistre}</details>
+        <p class="profile-disclaimer">Les besoins sont mesurés sur les ${escapeHtml(programme ? programme.profils : 0)} joueurs les mieux notés de l’effectif : écart entre leur moyenne et le niveau des meilleurs du groupe, attribut par attribut. La charge est une estimation, la forme et la fatigue réelles ne sont pas exportées par la sauvegarde.</p>`;
+    cible.querySelector("#programme-tactic-select")?.addEventListener("change", event => {
+        programmeCollectifTacticId = event.target.value;
+        afficherProgrammeCollectif();
+    });
+    cible.querySelector("#programme-horizon-select")?.addEventListener("change", event => {
+        programmeCollectifHorizon = Number(event.target.value) || 56;
+        afficherProgrammeCollectif();
+    });
+    const csv = () => module.csvProgramme(programme, {});
+    const statut = cible.querySelector("#programme-status");
+    const statutSaisie = cible.querySelector("#programme-saisie-status");
+    const copier = async (texte, message) => {
+        try {
+            await navigator.clipboard.writeText(texte);
+            if (statutSaisie) statutSaisie.textContent = message;
+        } catch (error) {
+            if (statutSaisie) statutSaisie.textContent = `Copie impossible : ${error.message}`;
+        }
+    };
+    cible.querySelector("#programme-copy-semaine")?.addEventListener("click", () => copier(texteSemaine, "Semaine copiée."));
+    cible.querySelector("#programme-copy-tout")?.addEventListener("click", () => copier(texteTout, "Programme complet copié."));
+    const exporterFmf = async index => {
+        const semaine = semaines[index];
+        if (!semaine) return;
+        const nom = nomFichierPlanning(semaine.debut);
+        if (statut) statut.textContent = "Génération du fichier .fmf…";
+        try {
+            const reponse = await fetch("/api/programme-fmf", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    nom,
+                    description: `Programme collectif Assistant FM — semaine du ${semaine.debut}`,
+                    grille: module.grilleFm27(semaine)
+                })
+            });
+            if (!reponse.ok) {
+                const probleme = await reponse.json().catch(() => ({}));
+                throw new Error(probleme.error || `HTTP ${reponse.status}`);
+            }
+            const blob = await reponse.blob();
+            const url = URL.createObjectURL(blob);
+            const lien = document.createElement("a");
+            lien.href = url;
+            lien.download = `${nom}.fmf`;
+            document.body.appendChild(lien);
+            lien.click();
+            lien.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+            if (statut) statut.textContent = `${nom}.fmf téléchargé — copiez-le dans le dossier « schedules » du jeu.`;
+        } catch (error) {
+            if (statut) statut.textContent = `Export impossible : ${error.message}`;
+        }
+    };
+    cible.querySelectorAll(".programme-export").forEach(bouton => {
+        bouton.addEventListener("click", () => exporterFmf(Number(bouton.dataset.index)));
+    });
+    const semainesPour = horizon => {
+        if (!dateDebut) return [];
+        const calcule = module.genererProgramme({ dateDebut, calendrier, joueurs, tactique, nbJours: horizon });
+        return calcule ? module.resumeSemaines(calcule, calendrier) : [];
+    };
+    const payloadSemaines = liste => liste.map(semaine => ({
+        nom: nomFichierPlanning(semaine.debut),
+        description: `Programme collectif Assistant FM — semaine du ${semaine.debut}`,
+        grille: module.grilleFm27(semaine)
+    }));
+    const envoyer = async (mode, bouton, liste) => {
+        const payload = liste || payloadSemaines(semaines);
+        if (!payload.length) {
+            if (statut) statut.textContent = "Aucune semaine à exporter.";
+            return;
+        }
+        const ancien = bouton ? bouton.textContent : "";
+        if (bouton) {
+            bouton.disabled = true;
+            bouton.textContent = mode === "disque" ? "Import en cours…" : "Génération…";
+        }
+        if (statut) statut.textContent = mode === "disque" ? "Écriture des fichiers…" : "Génération des fichiers…";
+        try {
+            const reponse = await fetch("/api/programme-fmf", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ semaines: payload, mode })
+            });
+            if (!reponse.ok) {
+                const probleme = await reponse.json().catch(() => ({}));
+                throw new Error(probleme.error || `HTTP ${reponse.status}`);
+            }
+            if (mode === "disque") {
+                const resultat = await reponse.json();
+                const liste = Array.isArray(resultat.fichiers) ? resultat.fichiers : [];
+                const resume = liste.length > 3
+                    ? `${liste.slice(0, 3).join(", ")}… (${liste.length} fichiers)`
+                    : liste.join(", ");
+                if (statut) {
+                    statut.textContent = liste.length
+                        ? `${liste.length} planning(s) écrit(s) dans « schedules » : ${resume}. Rouvrez le jeu pour les voir.`
+                        : "Aucun fichier écrit.";
+                }
+                if (typeof chargerPlannings === "function") chargerPlannings();
+                return;
+            }
+            const blob = await reponse.blob();
+            const url = URL.createObjectURL(blob);
+            const lien = document.createElement("a");
+            lien.href = url;
+            lien.download = "programme-collectif.zip";
+            document.body.appendChild(lien);
+            lien.click();
+            lien.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+            if (statut) statut.textContent = `${payload.length} planning(s) exporté(s) en archive.`;
+        } catch (error) {
+            if (statut) statut.textContent = `Export impossible : ${error.message}`;
+        } finally {
+            if (bouton) {
+                bouton.disabled = false;
+                bouton.textContent = ancien;
+            }
+        }
+    };
+    cible.querySelector("#programme-export-tout")?.addEventListener("click", event => envoyer("zip", event.target));
+    cible.querySelector("#programme-importer-tout")?.addEventListener("click", event => envoyer("disque", event.target));
+    cible.querySelector("#programme-importer-saison")?.addEventListener("click", async event => {
+        if (statut) statut.textContent = "Calcul du programme complet de la saison…";
+        const liste = payloadSemaines(semainesPour(364));
+        await envoyer("disque", event.target, liste);
+    });
+    const zoneFmf = cible.querySelector("#programme-fmf");
+    const rendrePlannings = donnees => {
+        if (!zoneFmf) return;
+        const plannings = Array.isArray(donnees.plannings) ? donnees.plannings : [];
+        if (!plannings.length) {
+            zoneFmf.innerHTML = "<span class=\"muted\">Aucun fichier .fmf dans le dossier des plannings.</span>";
+            return;
+        }
+        const lignes = plannings.map(planning => {
+            const ressources = (planning.ressources || [])
+                .map(ressource => `${escapeHtml(ressource.type || "?")} (${escapeHtml(ressource.extension || "")})`)
+                .join(", ");
+            const etat = planning.erreur ? ` — erreur : ${escapeHtml(planning.erreur)}` : "";
+            return `<div class="programme-item"><strong>${escapeHtml(planning.nom || planning.fichier)}</strong><span class="muted">${escapeHtml(planning.fichier)} · ${escapeHtml(planning.modifie || "")} · ${escapeHtml(planning.taille || 0)} o · ${ressources}${etat}</span></div>`;
+        }).join("");
+        zoneFmf.innerHTML = lignes;
+    };
+    const chargerPlannings = () => fetch("/api/schedules")
+        .then(reponse => (reponse.ok ? reponse.json() : Promise.reject(new Error(`HTTP ${reponse.status}`))))
+        .then(rendrePlannings)
+        .catch(erreur => {
+            if (zoneFmf) zoneFmf.innerHTML = `<span class="muted">Dossier indisponible : ${escapeHtml(erreur.message)}</span>`;
+        });
+    if (zoneFmf && typeof fetch === "function") chargerPlannings();
+    cible.querySelector("#programme-copy")?.addEventListener("click", async () => {
+        try {
+            await navigator.clipboard.writeText(csv());
+            if (statut) statut.textContent = "Programme copié dans le presse-papiers.";
+        } catch (error) {
+            if (statut) statut.textContent = `Copie impossible : ${error.message}`;
+        }
+    });
+    cible.querySelector("#programme-csv")?.addEventListener("click", () => {
+        const blob = new Blob([`\uFEFF${csv()}`], { type: "text/csv;charset=utf-8" });
+        const lien = document.createElement("a");
+        lien.href = URL.createObjectURL(blob);
+        lien.download = `programme-collectif-${programme ? programme.dateDebut : "sauvegarde"}.csv`;
+        lien.click();
+        URL.revokeObjectURL(lien.href);
+        if (statut) statut.textContent = "Export CSV téléchargé.";
+    });
 }
 
 function estMetierBackroom(job) {
@@ -1836,6 +2391,101 @@ function estMetierBackroom(job) {
     return Boolean(normalized)
         && !["unknown", "fonction non renseignée", "chairperson", "director", "managing director"]
             .includes(normalized);
+}
+
+function contratStaff(member) {
+    return String(member?.fin_contrat ?? "").trim() ? "sous_contrat" : "sans_contrat";
+}
+
+function finContratLisible(member) {
+    const fin = String(member?.fin_contrat ?? "").trim();
+    return fin || "Sans contrat";
+}
+
+function appliquerTriStaff(liste) {
+    if (!staffSort) return liste;
+    const cle = person => {
+        switch (staffSort) {
+            case "ca_desc": return -Number(person.ca ?? 0);
+            case "age_asc": return person.age == null ? Number.MAX_SAFE_INTEGER : Number(person.age);
+            case "salaire_desc": return -Number(person.salaire_hebdomadaire ?? 0);
+            case "contrat_asc": return String(person.fin_contrat ?? "9999-12-31");
+            case "nom_asc": return String(person.nom ?? "").toLocaleLowerCase("fr");
+            default: return 0;
+        }
+    };
+    liste.sort((a, b) => {
+        const gauche = cle(a), droite = cle(b);
+        const comparaison = typeof gauche === "number" && typeof droite === "number"
+            ? gauche - droite
+            : String(gauche).localeCompare(String(droite), "fr");
+        return comparaison || String(a.nom ?? "").localeCompare(String(b.nom ?? ""), "fr");
+    });
+    return liste;
+}
+
+function statistiquesValeurs(valeurs) {
+    const nombres = valeurs.map(Number).filter(Number.isFinite).sort((a, b) => a - b);
+    if (!nombres.length) return null;
+    const quantile = part => {
+        const position = (nombres.length - 1) * part;
+        const base = Math.floor(position);
+        const reste = position - base;
+        return nombres[base + 1] === undefined
+            ? nombres[base]
+            : nombres[base] + reste * (nombres[base + 1] - nombres[base]);
+    };
+    return {
+        effectif: nombres.length,
+        mediane: Math.round(quantile(0.5)),
+        p90: Math.round(quantile(0.9)),
+        maximum: nombres[nombres.length - 1]
+    };
+}
+
+function percentileValeur(valeur, valeurs) {
+    const nombres = valeurs.map(Number).filter(Number.isFinite);
+    if (!nombres.length || !Number.isFinite(Number(valeur))) return null;
+    const inferieures = nombres.filter(item => item < Number(valeur)).length;
+    const egales = nombres.filter(item => item === Number(valeur)).length;
+    return Math.round((inferieures + egales / 2) / nombres.length * 100);
+}
+
+function porteeStaff(member) {
+    const club = clubPourPersonne(member);
+    const classement = club ? classementClubActuel(club) : null;
+    return {
+        competition: classement?.competition_uid ?? null,
+        nation: member?.nation_id ?? club?.nation_id ?? null
+    };
+}
+
+function dansPortee(portee, porteeDemandee, competition, nation) {
+    if (porteeDemandee === "monde") return true;
+    if (porteeDemandee === "nation") return portee.nation != null && portee.nation === nation;
+    if (portee.competition != null && competition != null) return portee.competition === competition;
+    return portee.nation != null && portee.nation === nation;
+}
+
+function niveauComparable(member, reputationMonClub) {
+    const club = clubPourPersonne(member);
+    const reputation = Number(club?.reputation);
+    const reference = Number(reputationMonClub);
+    if (!Number.isFinite(reputation) || !Number.isFinite(reference) || reputation <= 0 || reference <= 0) return true;
+    const ratio = reputation / reference;
+    return ratio >= 0.5 && ratio <= 2;
+}
+
+function porteeEffective(groupe, porteeDemandee, competition) {
+    if (porteeDemandee !== "division") return porteeDemandee;
+    if (competition == null) return "nation";
+    return groupe.length >= 3 ? "division" : "nation";
+}
+
+function intitulePortee(portee, nomDivision) {
+    if (portee === "division") return `votre division (${nomDivision || "non identifiée"})`;
+    if (portee === "nation") return "votre nation";
+    return "le monde entier";
 }
 
 function traduireStatutEffectif(status) {
@@ -2350,6 +3000,8 @@ function afficherMonClub() {
                 <button type="button" data-club-tab="diagnostic">Diagnostic</button>
                 <button type="button" data-club-tab="performances">Performances</button>
                 <button type="button" data-club-tab="jeunes">Développement des jeunes</button>
+                <button type="button" data-club-tab="entrainement">Entraînement individuel</button>
+                <button type="button" data-club-tab="programme_collectif">Programme collectif</button>
             </div></details>
             <details class="club-menu" data-club-group="tactique"><summary>Tactique</summary><div class="club-menu-options">
                 <button type="button" data-club-tab="tactique">Ma tactique</button>
@@ -2733,6 +3385,7 @@ function render(append) {
             celluleRechercheHtml(row, celluleNationalite(person));
             cellule(row, traduireMetier(person.metier));
             cellule(row, person.age == null ? null : `${person.age} ans`);
+            cellule(row, finContratLisible(person));
             celluleNote(row, person.ca);
             celluleNote(row, person.pa);
             celluleRechercheHtml(row, linkCompetition(classementPersonne(person), clubPourPersonne(person) || {}, liguePersonne(person) || "—")).title = "Nom de compétition issu des données ou corrections locales ; non vérifié.";
@@ -3927,11 +4580,6 @@ function noteRole(player, role, positionKey) {
 configEnTetes();
 chargerIndexVisages();
 chargerNomsCompetitions();
-// Afficher la version dans le footer
-if (typeof APP_VERSION !== 'undefined') {
-    const versionEl = document.getElementById('app-version-display');
-    if (versionEl) versionEl.textContent = APP_VERSION;
-}
 // Afficher le compteur de téléchargements
 async function chargerCompteurTelechargements() {
     const el = document.getElementById('download-count');
@@ -3955,15 +4603,9 @@ document.getElementById("club-colors-reset").addEventListener("click", reinitial
 
 // --- Auto-update ---
 async function checkForUpdate() {
-    const debugEl = document.getElementById("update-debug");
-    if (!window.pywebview?.api?.check_for_update) {
-        if (debugEl) debugEl.textContent = "Update: API not available";
-        return;
-    }
+    if (!window.pywebview?.api?.check_for_update) return;
     try {
-        if (debugEl) debugEl.textContent = "Update: checking...";
         const result = await window.pywebview.api.check_for_update();
-        if (debugEl) debugEl.textContent = `Update: ${result?.available ? 'v' + result.latest + ' available' : 'up to date'} (${result?.current || APP_VERSION})`;
         if (result?.available && result?.url) {
             const btn = document.getElementById("update-btn");
             if (btn) {
@@ -3976,7 +4618,6 @@ async function checkForUpdate() {
             }
         }
     } catch (e) {
-        if (debugEl) debugEl.textContent = "Update: error - " + e.message;
         console.warn("Update check failed:", e);
     }
 }

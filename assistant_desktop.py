@@ -9,8 +9,8 @@ import subprocess
 from pathlib import Path
 
 # Version de l'application (mettre à jour à chaque release)
-APP_VERSION = "1.0.7-beta"
-APP_VERSION_DATE = "2026-11-12"
+APP_VERSION = "1.0.22-beta"
+APP_VERSION_DATE = "2026-11-15"
 # URL du fichier version.json (repo releases dédié)
 UPDATE_CHECK_URL = "https://raw.githubusercontent.com/joeybarton6om-sudo/releases/main/version.json"
 RELEASES_API_URL = "https://api.github.com/repos/joeybarton6om-sudo/releases/releases?per_page=100"
@@ -216,8 +216,10 @@ class DesktopApi:
             contenu = self.initial_file.read_bytes()
             encoding = "utf-16" if contenu.startswith((b"\xff\xfe", b"\xfe\xff")) else "utf-8-sig"
             lines = contenu.decode(encoding).splitlines()
-            if len(lines) != 4:
+            if len(lines) not in (3, 4):
                 raise ValueError("La configuration initiale des dossiers est invalide.")
+            while len(lines) < 4:
+                lines.append("")
             return dict(zip(("logos", "visages", "sauvegardes", "tactiques"), lines))
         return {"logos": "", "visages": "", "sauvegardes": "", "tactiques": ""}
 
