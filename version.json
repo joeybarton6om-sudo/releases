@@ -1,6 +1,6 @@
 {
-  "version": "1.0.24-beta",
+  "version": "1.0.25-beta",
   "date": "2026-11-18",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.24-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.24-beta : installeur NSIS avec modele .fmf inclus pour l'import planning\n- FM27 : extraction des sauvegardes avec gestion ReaderCheckError\n- FM27 : filtrage tactique par club_uid\n- FM27 : éditeur de correction de positions inconnues (avec/sans ballon)\n- FM27 : assignation manuelle de joueurs aux postes tactiques\n- Configuration : 4 dossiers (logos, visages, sauvegardes, tactiques)\n- Affichage version : 1.0.24-beta (index.html et assistant_desktop.py)"
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.25-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.25-beta : correction recherche modele .fmf a cote de l'exe (installe NSIS)\n- Correction raccourci : nom affiche 1.0.25-beta (et non 1.0.23-beta)\n- Version PyInstaller : 1.0.25-beta (plus de boucle de mise a jour)\n- FM27 : extraction des sauvegardes avec gestion ReaderCheckError\n- FM27 : filtrage tactique par club_uid\n- FM27 : editeur de correction de positions inconnues (avec/sans ballon)\n- FM27 : assignation manuelle de joueurs aux postes tactiques\n- Configuration : 4 dossiers (logos, visages, sauvegardes, tactiques)"
 }
