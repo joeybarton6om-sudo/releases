@@ -1,6 +1,6 @@
 {
-  "version": "1.0.25-beta",
+  "version": "1.0.26-beta",
   "date": "2026-11-18",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.25-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.25-beta : correction recherche modele .fmf a cote de l'exe (installe NSIS)\n- Correction raccourci : nom affiche 1.0.25-beta (et non 1.0.23-beta)\n- Version PyInstaller : 1.0.25-beta (plus de boucle de mise a jour)\n- FM27 : extraction des sauvegardes avec gestion ReaderCheckError\n- FM27 : filtrage tactique par club_uid\n- FM27 : editeur de correction de positions inconnues (avec/sans ballon)\n- FM27 : assignation manuelle de joueurs aux postes tactiques\n- Configuration : 4 dossiers (logos, visages, sauvegardes, tactiques)"
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.26-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.26-beta : correction UnboundLocalError 'historique_table' lors de l'extraction FM27 quand player_season_history() echoue\n- Version 1.0.25-beta : correction recherche modele .fmf a cote de l'exe (installe NSIS)\n- Correction raccourci : nom affiche 1.0.26-beta\n- Version PyInstaller : 1.0.26-beta (plus de boucle de mise a jour)"
 }
