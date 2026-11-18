@@ -1,6 +1,6 @@
 {
-  "version": "1.0.27-beta",
+  "version": "1.0.28-beta",
   "date": "2026-11-18",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.27-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.27-beta : vrai modele .fmf FM27 inclus (compatible avec le jeu)\n- L'import planning .fmf fonctionne des l'installation (plus besoin de copier manuellement un fichier squelette)\n- Correction UnboundLocalError 'historique_table' lors de l'extraction FM27\n- Raccourci affiche 1.0.27-beta\n- Version PyInstaller : 1.0.27-beta (fin de la boucle de mise a jour)"
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.28-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.28-beta : révision complète du programme d'entraînement collectif\n- Moins de jours de récupération (suppression du repos forcé J+2 après match)\n- Score plancher pour les séances de développement quand les besoins joueurs sont indisponibles\n- Réduction des séances quand le budget de charge est dépassé (surcharge)\n- Vrai modèle .fmf FM27 inclus pour l'import planning\n- Correction UnboundLocalError 'historique_table' lors de l'extraction FM27"
 }
