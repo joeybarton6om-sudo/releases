@@ -1,6 +1,6 @@
 {
-  "version": "1.0.26-beta",
+  "version": "1.0.27-beta",
   "date": "2026-11-18",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.26-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.26-beta : correction UnboundLocalError 'historique_table' lors de l'extraction FM27 quand player_season_history() echoue\n- Version 1.0.25-beta : correction recherche modele .fmf a cote de l'exe (installe NSIS)\n- Correction raccourci : nom affiche 1.0.26-beta\n- Version PyInstaller : 1.0.26-beta (plus de boucle de mise a jour)"
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.27-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.27-beta : vrai modele .fmf FM27 inclus (compatible avec le jeu)\n- L'import planning .fmf fonctionne des l'installation (plus besoin de copier manuellement un fichier squelette)\n- Correction UnboundLocalError 'historique_table' lors de l'extraction FM27\n- Raccourci affiche 1.0.27-beta\n- Version PyInstaller : 1.0.27-beta (fin de la boucle de mise a jour)"
 }
