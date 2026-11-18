@@ -1,0 +1,29 @@
+name: Annonce release Discord
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  poster-discord:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout dépôt releases
+        uses: actions/checkout@v4
+
+      - name: Checkout dépôt AssistantFM (script poster_discord.py)
+        uses: actions/checkout@v4
+        with:
+          repository: joeybarton6om-sudo/AssistantFM
+          ref: publier-v1.0.8
+          path: AssistantFM
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Poster l'annonce sur Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: python AssistantFM/poster_discord.py --version-url https://raw.githubusercontent.com/joeybarton6om-sudo/releases/main/version.json
