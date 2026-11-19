@@ -1,6 +1,6 @@
 {
-  "version": "1.0.31-beta",
-  "date": "2026-11-18",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.31-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.31-beta : séance 'Autres activités' (Esprit d'équipe ou Programme de proximité en alternance) ajoutée toutes les 3 semaines dans le programme d'entraînement collectif\n- Version 1.0.30-beta : correction freeze au démarrage (serveur_repondu vérification HTTP réelle, délai avant webview.start(), écran de chargement immédiat)\n- Version 1.0.29-beta : correction logo club qui s'affichait en plein écran\n- Version 1.0.28-beta : moins de jours de récupération (suppression repos forcé J+2), score plancher développement, réduction séances surcharge\n- Version 1.0.27-beta : vrai modèle .fmf FM27 inclus pour l'import planning\n- Correction UnboundLocalError 'historique_table' lors de l'extraction FM27"
+  "version": "1.0.32-beta",
+  "date": "2026-11-19",
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.32-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.32-beta : correction critique 0 joueurs/0 staff après extraction. Fallback quand sauvegarde.managed_clubs() retourne vide (détection via sauvegarde.clubs() puis extraction sans filtre club_uid).\n- Version 1.0.31-beta : séance 'Autres activités' (Esprit d'équipe ou Programme de proximité en alternance) toutes les 3 semaines dans le programme d'entraînement collectif\n- Version 1.0.30-beta : correction freeze au démarrage (serveur_repondu vérification HTTP réelle, délai avant webview.start(), écran de chargement immédiat)\n- Version 1.0.29-beta : correction logo club qui s'affichait en plein écran\n- Version 1.0.28-beta : moins de jours de récupération (suppression repos forcé J+2), score plancher développement, réduction séances surcharge\n- Version 1.0.27-beta : vrai modèle .fmf FM27 inclus pour l'import planning\n- Correction UnboundLocalError 'historique_table' lors de l'extraction FM27"
 }
