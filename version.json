@@ -1,6 +1,6 @@
 {
-  "version": "1.0.34-beta",
-  "date": "2026-11-19",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.34-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.34-beta : entraînement collectif - veille du match en préparation (3 séances tactiques) au lieu de récupération, seule le lendemain du match est en récupération (2 séances)\n- Version 1.0.33-beta : moins de jours de récupération (suppression du repos forcé le lendemain du match), 2 séances en jour de récupération au lieu d'une\n- Version 1.0.32-beta : correction critique 0 joueurs/0 staff après extraction. Fallback quand sauvegarde.managed_clubs() retourne vide.\n- Version 1.0.31-beta : séance 'Autres activités' (Esprit d'équipe ou Programme de proximité en alternance) toutes les 3 semaines\n- Version 1.0.30-beta : correction freeze au démarrage\n- Version 1.0.29-beta : correction logo club plein écran\n- Version 1.0.28-beta : moins de jours de récupération, score plancher développement, réduction séances surcharge\n- Version 1.0.27-beta : vrai modèle .fmf FM27 inclus pour l'import planning\n- Correction UnboundLocalError 'historique_table'"
+  "version": "1.0.35-beta",
+  "date": "2026-11-20",
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.35-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.35-beta : watcher de sauvegardes automatique. Surveille le dossier 'sauvegardes' configuré et déclenche l'extraction dès qu'un nouveau .fm ou .fmf apparaît.\n- Nouveaux endpoints : GET /api/watcher-status et POST /api/watcher-toggle.\n- Version 1.0.34-beta : veille du match en préparation (3 séances tactiques) au lieu de récupération.\n- Version 1.0.33-beta : moins de jours de récupération, 2 séances en jour de récupération.\n- Version 1.0.32-beta : correction critique 0 joueurs/0 staff après extraction.\n- Version 1.0.31-beta : séance 'Autres activités' toutes les 3 semaines.\n- Version 1.0.30-beta : correction freeze au démarrage."
 }
