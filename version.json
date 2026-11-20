@@ -1,6 +1,6 @@
 {
-  "version": "1.0.35-beta",
+  "version": "1.0.36-beta",
   "date": "2026-11-20",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.35-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.35-beta : watcher de sauvegardes automatique. Surveille le dossier 'sauvegardes' configuré et déclenche l'extraction dès qu'un nouveau .fm ou .fmf apparaît.\n- Nouveaux endpoints : GET /api/watcher-status et POST /api/watcher-toggle.\n- Version 1.0.34-beta : veille du match en préparation (3 séances tactiques) au lieu de récupération.\n- Version 1.0.33-beta : moins de jours de récupération, 2 séances en jour de récupération.\n- Version 1.0.32-beta : correction critique 0 joueurs/0 staff après extraction.\n- Version 1.0.31-beta : séance 'Autres activités' toutes les 3 semaines.\n- Version 1.0.30-beta : correction freeze au démarrage."
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.36-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.36-beta : scan immédiat des sauvegardes existantes (POST /api/watcher-scan). Extrait tous les .fm/.fmf déjà présents dans le dossier configuré, pas seulement les nouveaux.\n- Version 1.0.35-beta : watcher de sauvegardes automatique.\n- Version 1.0.34-beta : veille du match en préparation (3 séances tactiques).\n- Version 1.0.33-beta : moins de jours de récupération, 2 séances en jour de récupération.\n- Version 1.0.32-beta : correction critique 0 joueurs/0 staff après extraction.\n- Version 1.0.31-beta : séance 'Autres activités' toutes les 3 semaines.\n- Version 1.0.30-beta : correction freeze au démarrage."
 }
