@@ -1,6 +1,6 @@
 {
-  "version": "1.0.56-beta",
+  "version": "1.0.57-beta",
   "date": "2026-11-25",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.56-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.56-beta : build propre pour corriger l'affichage de la version installée dans le pied de page."
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.57-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.57-beta : comparaison des attributs staff avec le meilleur du même poste (valeur affichée après le /, comme pour les joueurs)."
 }
