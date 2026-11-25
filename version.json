@@ -1,6 +1,6 @@
 {
-  "version": "1.0.58-beta",
+  "version": "1.0.59-beta",
   "date": "2026-11-25",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.58-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.58-beta : correction des filtres staff (métier et contrat se déclenchent maintenant immédiatement dans l'onglet staff). Amélioration des bulles de profil staff : badges de métier et de statut (sous contrat / sans contrat, âge, salaire), mise en valeur des points forts et points faibles, comparaison visuelle avec le meilleur staff du même poste, disclaimer amélioré affichant les données disponibles, et section carrière staff renseignée avec les informations du profil."
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.59-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.59-beta : filtres métier/contrat staff corrigés (déclenchement immédiat), attributs staff affichés en français avec explications, visuel des bulles staff amélioré (badges métier, points forts/faibles, comparaison attributs après le /)."
 }
