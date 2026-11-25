@@ -1,6 +1,6 @@
 {
-  "version": "1.0.60-beta",
+  "version": "1.0.61-beta",
   "date": "2026-11-25",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.60-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.60-beta : correction du filtrage par genre (plus de joueuses dans une partie masculine ; genre déduit du club géré et de ses joueurs)."
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.61-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.61-beta : correction de l'onglet staff bloqué (garde rawData avant filtrerTout, garde #staff-job-filter absent, bloc genre protégé)."
 }
