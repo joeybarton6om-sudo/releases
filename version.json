@@ -1,6 +1,6 @@
 {
-  "version": "1.0.59-beta",
+  "version": "1.0.60-beta",
   "date": "2026-11-25",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.59-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.59-beta : filtres métier/contrat staff corrigés (déclenchement immédiat), attributs staff affichés en français avec explications, visuel des bulles staff amélioré (badges métier, points forts/faibles, comparaison attributs après le /)."
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.60-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.60-beta : correction du filtrage par genre (plus de joueuses dans une partie masculine ; genre déduit du club géré et de ses joueurs)."
 }
