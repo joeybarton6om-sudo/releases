@@ -1,6 +1,6 @@
 {
-  "version": "1.0.62-beta",
+  "version": "1.0.63-beta",
   "date": "2026-11-26",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.62-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.62-beta : correction de l'erreur 'staffSort is not defined' qui faisait planter l'onglet staff (ajout de la déclaration let staffSort en portée globale)."
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.63-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.63-beta : retrait des chairperson (non recrutables), métiers staff traduits en français, visuel des bulles staff amélioré (badges de métier avec couleur, métriques, points forts/faibles, comparaison après le /)."
 }
