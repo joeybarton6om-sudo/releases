@@ -1,6 +1,6 @@
 {
-  "version": "1.0.64-beta",
+  "version": "1.0.65-beta",
   "date": "2026-11-26",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.64-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.64-beta : recherche intelligent staff par catégorie (Entraînement, Recrutement, Médical), retrait des chairperson non recrutables, métiers traduits en français, visuel des bulles staff amélioré avec badges de métier et attributs clés affichés pour chaque rôle."
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.65-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.65-beta : bulles staff sur le modèle joueur (attributs uniquement en lien avec le métier, comparaison après le /, points forts/faibles, contrat dans le header), recherche intelligent staff par catégorie, retrait des chairperson, métiers traduits en français, filtres staff corrigés."
 }
