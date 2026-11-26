@@ -1,6 +1,6 @@
 {
-  "version": "1.0.63-beta",
+  "version": "1.0.64-beta",
   "date": "2026-11-26",
-  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.63-beta/AssistantFM-27-Setup.exe",
-  "changelog": "- Version 1.0.63-beta : retrait des chairperson (non recrutables), métiers staff traduits en français, visuel des bulles staff amélioré (badges de métier avec couleur, métriques, points forts/faibles, comparaison après le /)."
+  "url": "https://github.com/joeybarton6om-sudo/releases/releases/download/v1.0.64-beta/AssistantFM-27-Setup.exe",
+  "changelog": "- Version 1.0.64-beta : recherche intelligent staff par catégorie (Entraînement, Recrutement, Médical), retrait des chairperson non recrutables, métiers traduits en français, visuel des bulles staff amélioré avec badges de métier et attributs clés affichés pour chaque rôle."
 }
